@@ -165,15 +165,17 @@
   (let ((files (directory-files (oref db :objects-directory) t "^[^.]")))
     (mapc-with-progress-reporter
      (or msg "Loading registry...")
-     (lambda (file)
-       (puthash (intern (file-name-nondirectory file))
-		(object-registry-obj-read file)
-		(oref db :data)))
+     (apply-partially 'object-registry-load-obj epkg-registry)
      files 0 (* (length files) (or factor 1))))
   (when (slot-boundp db :indices-file)
     (with-temp-buffer
       (insert-file-contents (oref db :indices-file))
       (oset db :tracker (eval (read (buffer-string)))))))
+
+(defmethod object-registry-load-obj ((db object-registry-db) file)
+  (puthash (intern (file-name-nondirectory file))
+	   (object-registry-obj-read file)
+	   (oref db :data)))
 
 (defmethod object-registry-save ((db object-registry-db))
   (maphash (lambda (_ entry)
