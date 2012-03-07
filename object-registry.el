@@ -4,7 +4,7 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 0.1.0
+;; Version: 0.1.0-git
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
 
@@ -165,7 +165,7 @@
   (let ((files (directory-files (oref db :objects-directory) t "^[^.]")))
     (mapc-with-progress-reporter
      (or msg "Loading registry...")
-     (apply-partially 'object-registry-load-obj epkg-registry)
+     (apply-partially 'object-registry-load-obj db)
      files 0 (* (length files) (or factor 1))))
   (when (slot-boundp db :indices-file)
     (with-temp-buffer
