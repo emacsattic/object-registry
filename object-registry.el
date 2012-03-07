@@ -4,7 +4,7 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 0.1.0-git
+;; Version: 0.1.1
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
 
@@ -35,8 +35,8 @@
 (require 'eieio)
 (require 'eieio-base)
 (require 'eieio-pp nil t)
-(require 'map-progress)
 (require 'registry)
+(require 'reporter)
 
 (defclass object-registry-obj () () :abstract t)
 
@@ -162,11 +162,13 @@
     (gethash val (registry-lookup-secondary db tracksym))))
 
 (defmethod object-registry-load ((db object-registry-db) &optional msg factor)
-  (let ((files (directory-files (oref db :objects-directory) t "^[^.]")))
-    (mapc-with-progress-reporter
-     (or msg "Loading registry...")
-     (apply-partially 'object-registry-load-obj db)
-     files 0 (* (length files) (or factor 1))))
+  (let* ((files (directory-files (oref db :objects-directory) t "^[^.]"))
+	 (reporter (make-progress-reporter (or msg "Loading registry...")
+					   0 (* (length files) (or factor 1))))
+	 (idx 0))
+    (dolist (file files)
+      (object-registry-load-obj db file)
+      (progress-reporter-update reporter (incf idx))))
   (when (slot-boundp db :indices-file)
     (with-temp-buffer
       (insert-file-contents (oref db :indices-file))
