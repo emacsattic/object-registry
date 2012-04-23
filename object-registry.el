@@ -4,7 +4,7 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
 
@@ -168,11 +168,12 @@
 	 (idx 0))
     (dolist (file files)
       (object-registry-load-obj db file)
-      (progress-reporter-update reporter (incf idx))))
-  (when (slot-boundp db :indices-file)
-    (with-temp-buffer
-      (insert-file-contents (oref db :indices-file))
-      (oset db :tracker (eval (read (buffer-string)))))))
+      (progress-reporter-update reporter (incf idx)))
+    (when (slot-boundp db :indices-file)
+      (with-temp-buffer
+	(insert-file-contents (oref db :indices-file))
+	(oset db :tracker (eval (read (buffer-string))))))
+    (progress-reporter-done reporter)))
 
 (defmethod object-registry-load-obj ((db object-registry-db) file)
   (puthash (intern (file-name-nondirectory file))
