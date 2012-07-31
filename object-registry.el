@@ -32,6 +32,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl)) ; assert, pushnew, incf, destructuring-bind
+
 (require 'eieio)
 (require 'eieio-base)
 (require 'eieio-pp nil t)
@@ -203,8 +206,10 @@
 	 (ws (make-string (* eieio-print-depth 2) ? ))
 	 alist)
     (maphash (lambda (key val) (push (list key val) alist)) hash-table)
-    (dolist (elt (sort* (nreverse alist) 'string< :key
-			(lambda (a) (funcall (if (listp (car a)) 'caar 'car) a))))
+    (dolist (elt (sort (nreverse alist)
+		       (lambda (a b)
+			 (string< (if (listp (car a)) (caar a) (car a))
+				  (if (listp (car b)) (caar b) (car b))))))
       (princ "\n")
       (destructuring-bind (key val) elt
 	(princ ws)
