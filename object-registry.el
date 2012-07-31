@@ -44,39 +44,39 @@
 
 (defmethod object-registry-obj-file ((this object-registry-obj) db)
   (expand-file-name (object-name-string this)
-		    (oref db :objects-directory)))
+                    (oref db :objects-directory)))
 
 (defun object-registry-obj-read (filename)
   (let (ret (buf (get-buffer-create " *tmp registry object read*")))
     (unwind-protect
-	(save-excursion
-	  (with-current-buffer buf
-	    (erase-buffer)
-	    (insert-file-contents filename nil nil nil t)
-	    (setq ret (read (buffer-string))))
-	  (unless (child-of-class-p (car ret) 'object-registry-obj)
-	    (error "Corrupt object on disk"))
-	  (setq ret (eval ret)))
+        (save-excursion
+          (with-current-buffer buf
+            (erase-buffer)
+            (insert-file-contents filename nil nil nil t)
+            (setq ret (read (buffer-string))))
+          (unless (child-of-class-p (car ret) 'object-registry-obj)
+            (error "Corrupt object on disk"))
+          (setq ret (eval ret)))
       (kill-buffer buf))
     ret))
 
 (defmethod object-registry-obj-save ((this object-registry-obj) db)
   (let ((buf (get-buffer-create " *tmp registry object save*")))
     (unwind-protect
-	(save-excursion
-	  (with-current-buffer buf
-	    (erase-buffer)
-	    (let ((standard-output buf))
-	      (object-write this))
-	    (let ((backup-inhibit t)
-		  (cs (car (find-coding-systems-region
-			    (point-min) (point-max)))))
-	      (unless (eq cs 'undecided)
-		(setq buffer-file-coding-system cs))
-	      (write-region (point-min) (point-max)
-			    (object-registry-obj-file this db)
-			    nil 1)))
-	(kill-buffer buf)))))
+        (save-excursion
+          (with-current-buffer buf
+            (erase-buffer)
+            (let ((standard-output buf))
+              (object-write this))
+            (let ((backup-inhibit t)
+                  (cs (car (find-coding-systems-region
+                            (point-min) (point-max)))))
+              (unless (eq cs 'undecided)
+                (setq buffer-file-coding-system cs))
+              (write-region (point-min) (point-max)
+                            (object-registry-obj-file this db)
+                            nil 1)))
+        (kill-buffer buf)))))
 
 (defmethod object-registry-obj-slot-exists-p ((this object-registry-obj) slot)
   (slot-exists-p this slot))
@@ -88,38 +88,38 @@
 
 (defclass object-registry-db (registry-db)
   ((objects-directory
-	:initarg :objects-directory)
+        :initarg :objects-directory)
    (indices-file
-	:initarg :indices-file)
+        :initarg :indices-file)
    (tracked-atomic
-	:allocation :class)))
+        :allocation :class)))
 
 (defmethod registry-delete ((db object-registry-db) keys assert &rest spec)
   (let* ((data (oref db :data))
-	 (keys (or keys
-		   (apply 'registry-search db spec)))
-	 (tracked (oref db :tracked)))
+         (keys (or keys
+                   (apply 'registry-search db spec)))
+         (tracked (oref db :tracked)))
 
     (dolist (key keys)
       (let ((entry (gethash key data))
-	    file)
-	(when assert
-	  (assert entry nil
-		  "Key %s does not exists in database" key))
-	(when entry
-	  (dolist (tr tracked)
-	    (when (registry-lookup-secondary db tr)
-	      (dolist (val (registry-field-values entry tr db))
-		(let* ((value-keys (registry-lookup-secondary-value
-				    db tr val)))
-		  (when (member key value-keys)
-		    (registry-lookup-secondary-value
-		     db tr val
-		     (or (delete key value-keys) t)))))))
-	  (remhash key data)
-	  (setq file (object-registry-obj-file entry db))
-	  (when file
-	    (delete-file file)))))
+            file)
+        (when assert
+          (assert entry nil
+                  "Key %s does not exists in database" key))
+        (when entry
+          (dolist (tr tracked)
+            (when (registry-lookup-secondary db tr)
+              (dolist (val (registry-field-values entry tr db))
+                (let* ((value-keys (registry-lookup-secondary-value
+                                    db tr val)))
+                  (when (member key value-keys)
+                    (registry-lookup-secondary-value
+                     db tr val
+                     (or (delete key value-keys) t)))))))
+          (remhash key data)
+          (setq file (object-registry-obj-file entry db))
+          (when file
+            (delete-file file)))))
     keys))
 
 (defmethod registry-insert ((db object-registry-db) key entry)
@@ -127,28 +127,28 @@
   (dolist (tr (oref db :tracked))
     (dolist (val (registry-field-values entry tr db))
       (let* ((value-keys (registry-lookup-secondary-value db tr val)))
-	(pushnew key value-keys :test 'equal)
-	(registry-lookup-secondary-value db tr val value-keys))))
+        (pushnew key value-keys :test 'equal)
+        (registry-lookup-secondary-value db tr val value-keys))))
   (object-registry-obj-save entry db)
   entry)
 
 (defmethod registry-reindex ((db object-registry-db))
   (let ((count 0)
-	(expected (* (length (oref db :tracked)) (registry-size db))))
+        (expected (* (length (oref db :tracked)) (registry-size db))))
     (dolist (tr (oref db :tracked))
       (let (values)
-	(maphash
-	 (lambda (key v)
-	   (incf count)
-	   (when (and (< 0 expected)
-		      (= 0 (mod count 1000)))
-	     (message "reindexing: %d of %d (%.2f%%)"
-		      count expected (/ (* 100 count) expected)))
-	   (dolist (val (registry-field-values v tr db))
-	     (let* ((value-keys (registry-lookup-secondary-value db tr val)))
-	       (push key value-keys)
-	       (registry-lookup-secondary-value db tr val value-keys))))
-	 (oref db :data))))))
+        (maphash
+         (lambda (key v)
+           (incf count)
+           (when (and (< 0 expected)
+                      (= 0 (mod count 1000)))
+             (message "reindexing: %d of %d (%.2f%%)"
+                      count expected (/ (* 100 count) expected)))
+           (dolist (val (registry-field-values v tr db))
+             (let* ((value-keys (registry-lookup-secondary-value db tr val)))
+               (push key value-keys)
+               (registry-lookup-secondary-value db tr val value-keys))))
+         (oref db :data))))))
 
 (defmethod object-registry-reindex ((db object-registry-db))
   (oset db tracker (make-hash-table :size 100 :rehash-size 2.0))
@@ -156,36 +156,36 @@
   (object-registry-save db))
 
 (defmethod registry-lookup-secondary-value ((db object-registry-db) tracksym val
-					    &optional set)
+                                            &optional set)
   (when (or set (registry-lookup-secondary db tracksym))
     (when set
       (puthash val (if (eq t set) nil (sort set 'string<))
-	       (registry-lookup-secondary db tracksym t)))
+               (registry-lookup-secondary db tracksym t)))
     (gethash val (registry-lookup-secondary db tracksym))))
 
 (defmethod object-registry-load ((db object-registry-db) &optional msg factor)
   (let* ((files (directory-files (oref db :objects-directory) t "^[^.]"))
-	 (reporter (make-progress-reporter (or msg "Loading registry...")
-					   0 (* (length files) (or factor 1))))
-	 (idx 0))
+         (reporter (make-progress-reporter (or msg "Loading registry...")
+                                           0 (* (length files) (or factor 1))))
+         (idx 0))
     (dolist (file files)
       (object-registry-load-obj db file)
       (progress-reporter-update reporter (incf idx)))
     (when (slot-boundp db :indices-file)
       (with-temp-buffer
-	(insert-file-contents (oref db :indices-file))
-	(oset db :tracker (eval (read (buffer-string))))))
+        (insert-file-contents (oref db :indices-file))
+        (oset db :tracker (eval (read (buffer-string))))))
     (progress-reporter-done reporter)))
 
 (defmethod object-registry-load-obj ((db object-registry-db) file)
   (puthash (intern (file-name-nondirectory file))
-	   (object-registry-obj-read file)
-	   (oref db :data)))
+           (object-registry-obj-read file)
+           (oref db :data)))
 
 (defmethod object-registry-save ((db object-registry-db))
   (maphash (lambda (_ entry)
-	     (object-registry-obj-save entry db))
-	   (oref db :data))
+             (object-registry-obj-save entry db))
+           (oref db :data))
   (when (slot-boundp db :indices-file)
     (object-registry-save-tracker db)))
 
@@ -203,24 +203,27 @@
     (hash-table-rehash-size hash-table)
     (hash-table-rehash-threshold hash-table)))
   (let* ((eieio-print-depth (1+ eieio-print-depth))
-	 (ws (make-string (* eieio-print-depth 2) ? ))
-	 alist)
+         (ws (make-string (* eieio-print-depth 2) ? ))
+         alist)
     (maphash (lambda (key val) (push (list key val) alist)) hash-table)
     (dolist (elt (sort (nreverse alist)
-		       (lambda (a b)
-			 (string< (if (listp (car a)) (caar a) (car a))
-				  (if (listp (car b)) (caar b) (car b))))))
+                       (lambda (a b)
+                         (string< (if (listp (car a)) (caar a) (car a))
+                                  (if (listp (car b)) (caar b) (car b))))))
       (princ "\n")
       (destructuring-bind (key val) elt
-	(princ ws)
-	(prin1 key)
-	(princ " ")
-	(if (hash-table-p val)
-	    (object-registry-tracker-prin1 val)
-	  (prin1 val)))))
+        (princ ws)
+        (prin1 key)
+        (princ " ")
+        (if (hash-table-p val)
+            (object-registry-tracker-prin1 val)
+          (prin1 val)))))
   (princ "))")
   (when (= eieio-print-depth 0)
     (princ "\n")))
 
 (provide 'object-registry)
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; object-registry.el ends here
