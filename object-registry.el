@@ -4,9 +4,13 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 0.1.2
+;; Version: 1.0.0
+;; Status: beta
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
+
+;; This is a beta release.  Version numbers are inspired by how
+;; Emacs is versioned - 1.1.0 will be the first stable version.
 
 ;; This file is not part of GNU Emacs.
 
