@@ -36,7 +36,6 @@
 (require 'eieio-base)
 (require 'eieio-pp nil t)
 (require 'registry)
-(require 'reporter)
 
 (defclass object-registry-obj () () :abstract t)
 
