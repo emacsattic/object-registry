@@ -4,7 +4,7 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Status: beta
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
@@ -93,6 +93,9 @@
 (defclass object-registry-db (registry-db)
   ((objects-directory
         :initarg :objects-directory)
+   (object-file-regexp
+        :initform "^[^.]"
+        :initarg :object-file-regexp)
    (indices-file
         :initarg :indices-file)
    (tracked-atomic
@@ -168,7 +171,8 @@
     (gethash val (registry-lookup-secondary db tracksym))))
 
 (defmethod object-registry-load ((db object-registry-db) &optional msg factor)
-  (let* ((files (directory-files (oref db :objects-directory) t "^[^.]"))
+  (let* ((files (directory-files (oref db :objects-directory) t
+                                 (oref db :object-file-regexp)))
          (reporter (make-progress-reporter (or msg "Loading registry...")
                                            0 (* (length files) (or factor 1))))
          (idx 0))
