@@ -99,7 +99,10 @@
    (indices-file
         :initarg :indices-file)
    (tracked-atomic
-        :allocation :class)))
+        :allocation :class)
+   (tracked-sort
+        :allocation :class
+        :initform nil)))
 
 (defmethod registry-delete ((db object-registry-db) keys assert &rest spec)
   (let* ((data (oref db :data))
@@ -170,7 +173,11 @@
         (setq h (registry-lookup-secondary db tracksym t)))
       (if (eq set t)
           (remhash val h)
-        (puthash val (sort set 'string<) h)))
+        (let ((s (cdr (assq tracksym (oref db tracked-sort)))))
+          (puthash val (if s
+                           (funcall s val set)
+                         (sort set 'string<))
+                   h))))
     (when h
       (gethash val h))))
 
