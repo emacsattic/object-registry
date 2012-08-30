@@ -164,11 +164,15 @@
 
 (defmethod registry-lookup-secondary-value ((db object-registry-db) tracksym val
                                             &optional set)
-  (when (or set (registry-lookup-secondary db tracksym))
+  (let ((h (registry-lookup-secondary db tracksym)))
     (when set
-      (puthash val (if (eq t set) nil (sort set 'string<))
-               (registry-lookup-secondary db tracksym t)))
-    (gethash val (registry-lookup-secondary db tracksym))))
+      (unless h
+        (setq h (registry-lookup-secondary db tracksym t)))
+      (if (eq set t)
+          (remhash val h)
+        (puthash val (sort set 'string<) h)))
+    (when h
+      (gethash val h))))
 
 (defmethod object-registry-load ((db object-registry-db) &optional msg factor)
   (let* ((files (directory-files (oref db :objects-directory) t
