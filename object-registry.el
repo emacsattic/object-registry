@@ -6,6 +6,7 @@
 ;; Created: 20120118
 ;; Version: 1.0.2
 ;; Status: beta
+;; Package-Requires: ((cl-lib "0.2"))
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
 
