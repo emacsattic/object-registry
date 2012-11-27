@@ -37,7 +37,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)) ; assert, pushnew, incf, destructuring-bind
+  (require 'cl-lib))
 
 (require 'eieio)
 (require 'eieio-base)
@@ -114,8 +114,8 @@
       (let ((entry (gethash key data))
             file)
         (when assert
-          (assert entry nil
-                  "Key %s does not exists in database" key))
+          (cl-assert entry nil
+                     "Key %s does not exists in database" key))
         (when entry
           (dolist (tr tracked)
             (when (registry-lookup-secondary db tr)
@@ -137,7 +137,7 @@
   (dolist (tr (oref db :tracked))
     (dolist (val (registry-field-values entry tr db))
       (let* ((value-keys (registry-lookup-secondary-value db tr val)))
-        (pushnew key value-keys :test 'equal)
+        (cl-pushnew key value-keys :test 'equal)
         (registry-lookup-secondary-value db tr val value-keys))))
   (object-registry-obj-save entry db)
   entry)
@@ -149,7 +149,7 @@
       (let (values)
         (maphash
          (lambda (key v)
-           (incf count)
+           (cl-incf count)
            (when (and (< 0 expected)
                       (= 0 (mod count 1000)))
              (message "reindexing: %d of %d (%.2f%%)"
@@ -189,7 +189,7 @@
          (idx 0))
     (dolist (file files)
       (object-registry-load-obj db file)
-      (progress-reporter-update reporter (incf idx)))
+      (progress-reporter-update reporter (cl-incf idx)))
     (when (slot-boundp db :indices-file)
       (with-temp-buffer
         (insert-file-contents (oref db :indices-file))
@@ -230,7 +230,7 @@
                          (string< (if (listp (car a)) (caar a) (car a))
                                   (if (listp (car b)) (caar b) (car b))))))
       (princ "\n")
-      (destructuring-bind (key val) elt
+      (cl-destructuring-bind (key val) elt
         (princ ws)
         (prin1 key)
         (princ " ")
