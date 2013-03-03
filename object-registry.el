@@ -1,17 +1,14 @@
 ;;; object-registry.el --- track data items by various instance slots
 
-;; Copyright (C) 2012  Jonas Bernoulli
+;; Copyright (C) 2012-2013  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 1.0.2
+;; Version: 1.1.0
 ;; Status: beta
 ;; Package-Requires: ((cl-lib "0.2"))
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
-
-;; This is a beta release.  Version numbers are inspired by how
-;; Emacs is versioned - 1.1.0 will be the first stable version.
 
 ;; This file is not part of GNU Emacs.
 
