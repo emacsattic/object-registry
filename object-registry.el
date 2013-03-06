@@ -4,7 +4,7 @@
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 1.1.0
+;; Version: 1.2.0
 ;; Package-Requires: ((cl-lib "0.2"))
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
@@ -30,6 +30,16 @@
 
 ;; This library builds on standard library `registry.el', extending it
 ;; with the ability to track EIEIO objects.
+
+;; WARNING: This version (1.2.*) is only useful to convert from a
+;; registry created with version <= 1.1.* to one suitable for version
+;; 2.*.*.
+
+;; 1.1.* stores the constructor of each data object in it's own file.
+;; 2.*.* will store all data objects and the tracker in the same file.
+;; It will also store object vectors instead of constructors.  This
+;; makes it much faster to load and save the registry.  But it also
+;; makes it harder to modify the classes of the data object.
 
 ;;; Code:
 
