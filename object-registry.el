@@ -92,8 +92,8 @@
    (object-file-regexp
         :initform "^[^.]"
         :initarg :object-file-regexp)
-   (indices-file
-        :initarg :indices-file)
+   (tracker-file
+        :initarg :tracker-file)
    (tracked-atomic
         :allocation :class)
    (tracked-sort
@@ -186,9 +186,9 @@
     (dolist (file files)
       (object-registry-load-obj db file)
       (progress-reporter-update reporter (cl-incf idx)))
-    (when (slot-boundp db :indices-file)
+    (when (slot-boundp db :tracker-file)
       (with-temp-buffer
-        (insert-file-contents (oref db :indices-file))
+        (insert-file-contents (oref db :tracker-file))
         (oset db :tracker (eval (read (buffer-string))))))
     (progress-reporter-done reporter)))
 
@@ -201,11 +201,11 @@
   (maphash (lambda (_ entry)
              (object-registry-obj-save entry db))
            (oref db :data))
-  (when (slot-boundp db :indices-file)
+  (when (slot-boundp db :tracker-file)
     (object-registry-save-tracker db)))
 
 (defmethod object-registry-save-tracker ((db object-registry-db))
-  (with-temp-file (oref db :indices-file)
+  (with-temp-file (oref db :tracker-file)
     (let ((standard-output (current-buffer)))
       (object-registry-hash-table-prin1 (oref db tracker)))))
 
