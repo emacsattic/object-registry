@@ -5,7 +5,6 @@
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
 ;; Version: 1.1.0
-;; Status: beta
 ;; Package-Requires: ((cl-lib "0.2"))
 ;; Homepage: https://github.com/tarsius/object-registry
 ;; Keywords: data, OO
