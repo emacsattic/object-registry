@@ -177,11 +177,11 @@
     (when h
       (gethash val h))))
 
-(defmethod object-registry-load ((db object-registry-db) &optional msg factor)
+(defmethod object-registry-load ((db object-registry-db) &optional msg)
   (let* ((files (directory-files (oref db :objects-directory) t
                                  (oref db :object-file-regexp)))
          (reporter (make-progress-reporter (or msg "Loading registry...")
-                                           0 (* (length files) (or factor 1))))
+                                           0 (length files)))
          (idx 0))
     (dolist (file files)
       (object-registry-load-obj db file)
