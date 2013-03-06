@@ -92,6 +92,8 @@
    (object-file-regexp
         :initform "^[^.]"
         :initarg :object-file-regexp)
+   (objects-file
+        :initarg :objects-file)
    (tracker-file
         :initarg :tracker-file)
    (tracked-atomic
@@ -123,9 +125,12 @@
                      db tr val
                      (or (delete key value-keys) t)))))))
           (remhash key data)
-          (setq file (object-registry-obj-file entry db))
-          (when file
-            (delete-file file)))))
+          (when (slot-boundp db :objects-directory)
+            (setq file (object-registry-obj-file entry db))
+            (when file
+              (delete-file file)))
+          (when (slot-boundp db :objects-file)
+            (object-registry-save-objects db)))))
     keys))
 
 (defmethod registry-insert ((db object-registry-db) key entry)
@@ -135,7 +140,10 @@
       (let* ((value-keys (registry-lookup-secondary-value db tr val)))
         (cl-pushnew key value-keys :test 'equal)
         (registry-lookup-secondary-value db tr val value-keys))))
-  (object-registry-obj-save entry db)
+  (when (slot-boundp db :objects-directory)
+    (object-registry-obj-save entry db))
+  (when (slot-boundp db :objects-file)
+    (object-registry-save-objects db))
   entry)
 
 (defmethod registry-reindex ((db object-registry-db))
@@ -177,7 +185,39 @@
     (when h
       (gethash val h))))
 
-(defmethod object-registry-load ((db object-registry-db) &optional msg)
+(defmethod object-registry-load ((db object-registry-db)
+                                 &optional msg restore)
+  (when (slot-boundp db :tracker-file)
+    (with-temp-buffer
+      (insert-file-contents (oref db :tracker-file))
+      (oset db :tracker (eval (read (buffer-string))))))
+  (if (and (not restore)
+           (slot-boundp db :objects-file)
+           (file-exists-p (oref db objects-file)))
+      (object-registry-load-cache db)
+    (object-registry-load-files db msg)))
+
+(defun object-registry-restore-obj (obj)
+  (vconcat (mapcar (lambda (val)
+                     (cond ((eq val 'unbound)
+                            eieio-unbound)
+                           ((eieio-object-p val)
+                            (object-registry-restore-obj val))
+                           (t
+                            val)))
+                   obj)))
+
+(defmethod object-registry-load-cache ((db object-registry-db))
+  (with-temp-buffer
+    (insert-file-contents (oref db :objects-file))
+    (let ((data (eval (read (buffer-string)))))
+      (maphash (lambda (key val)
+                 (puthash key (object-registry-restore-obj val) data))
+               data)
+      (oset db :data data))))
+
+(defmethod object-registry-load-files ((db object-registry-db)
+                                       &optional msg)
   (let* ((files (directory-files (oref db :objects-directory) t
                                  (oref db :object-file-regexp)))
          (reporter (make-progress-reporter (or msg "Loading registry...")
@@ -198,11 +238,19 @@
            (oref db :data)))
 
 (defmethod object-registry-save ((db object-registry-db))
-  (maphash (lambda (_ entry)
-             (object-registry-obj-save entry db))
-           (oref db :data))
+  (when (slot-boundp db :objects-directory)
+    (maphash (lambda (_ entry)
+               (object-registry-obj-save entry db))
+             (oref db :data)))
+  (when (slot-boundp db :objects-file)
+    (object-registry-save-objects db))
   (when (slot-boundp db :tracker-file)
     (object-registry-save-tracker db)))
+
+(defmethod object-registry-save-objects ((db object-registry-db))
+  (with-temp-file (oref db :objects-file)
+    (let ((standard-output (current-buffer)))
+      (object-registry-hash-table-prin1 (oref db data)))))
 
 (defmethod object-registry-save-tracker ((db object-registry-db))
   (with-temp-file (oref db :tracker-file)
