@@ -207,9 +207,9 @@
 (defmethod object-registry-save-tracker ((db object-registry-db))
   (with-temp-file (oref db :indices-file)
     (let ((standard-output (current-buffer)))
-      (object-registry-tracker-prin1 (oref db tracker)))))
+      (object-registry-hash-table-prin1 (oref db tracker)))))
 
-(defun object-registry-tracker-prin1 (hash-table)
+(defun object-registry-hash-table-prin1 (hash-table)
   (princ
    (format
     "#s(hash-table size %s test %s rehash-size %s rehash-threshold %s data ("
@@ -231,7 +231,7 @@
         (prin1 key)
         (princ " ")
         (if (hash-table-p val)
-            (object-registry-tracker-prin1 val)
+            (object-registry-hash-table-prin1 val)
           (prin1 val)))))
   (princ "))")
   (when (= eieio-print-depth 0)
