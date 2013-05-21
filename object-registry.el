@@ -1,13 +1,13 @@
-;;; object-registry.el --- track data items by various instance slots
+;;; object-registry.el --- OBSOLETE track data items by various instance slots
 
 ;; Copyright (C) 2012-2013  Jonas Bernoulli
 
 ;; Author: Jonas Bernoulli <jonas@bernoul.li>
 ;; Created: 20120118
-;; Version: 1.1.0
-;; Status: beta
+;; Version: 1.1.1
+;; Status: end-of-life
 ;; Package-Requires: ((cl-lib "0.2"))
-;; Homepage: https://github.com/tarsius/object-registry
+;; Homepage: https://github.com/emacsattic/object-registry
 ;; Keywords: data, OO
 
 ;; This file is not part of GNU Emacs.
@@ -26,6 +26,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
+;;  # This package is no longer maintained.  You should not use it for
+;;  # any new projects.  An incompatible replacement will be available
+;;  # from https://github.com/tarsius/registries.
 
 ;; Track data items by various instance slots.
 
