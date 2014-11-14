@@ -28,8 +28,7 @@
 ;;; Commentary:
 
 ;;  # This package is no longer maintained.  You should not use it for
-;;  # any new projects.  An incompatible replacement will be available
-;;  # from https://github.com/tarsius/registries.
+;;  # any new projects.
 
 ;; Track data items by various instance slots.
 
